@@ -4,7 +4,6 @@ const { buildBooksDatabase } = require("../../utils/mockData");
 function Book() {
   function createTable() {
     const sql = `
-      DROP TABLE books;
       
       CREATE TABLE IF NOT EXISTS books (
         id              SERIAL        PRIMARY KEY,
@@ -19,6 +18,18 @@ function Book() {
     db.query(sql)
       .then((result) => console.log("[DB] Book table ready."))
       .catch(console.error);
+  }
+
+  async function findOneById(bookId, callback) {
+    const getOneById = `
+    SELECT *
+    FROM books
+    WHERE id = $1;
+  `;
+
+    const result = await db.query(getOneById, [bookId]);
+
+    callback(result.rows[0]);
   }
 
   function mockData() {
@@ -38,6 +49,9 @@ function Book() {
 
   createTable();
   mockData();
+  return {
+    findOneById,
+  };
 }
 
 module.exports = Book;

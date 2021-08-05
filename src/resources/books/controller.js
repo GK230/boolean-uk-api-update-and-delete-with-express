@@ -1,4 +1,7 @@
 const db = require("../../utils/database");
+const Book = require("./model");
+
+const { findOneById } = Book();
 
 function createOne(req, res) {
   const createOne = `
@@ -39,8 +42,34 @@ function getOneById(req, res) {
     .catch(console.error);
 }
 
+function updateOneById(req, res) {
+  const bookIdToUpdate = Number(req.params.id);
+
+  const bookToUpdate = req.body;
+
+  console.log(bookToUpdate);
+
+  findOneById(bookIdToUpdate, (foundBook) => {
+    const updatedBook = { ...foundBook, ...bookToUpdate };
+
+    const updateOneById = `
+    UPDATE books
+    SET title = $1
+    WHERE id = $2
+    RETURNING *;
+    `;
+    db.query(updateOneById, [updatedBook.title, bookIdToUpdate])
+      .then((result) => {
+        console.log(result);
+        res.json({ data: result.rows[0] });
+      })
+      .catch(console.error);
+  });
+}
+
 module.exports = {
   createOne,
   getAll,
-  getOneById
+  getOneById,
+  updateOneById,
 };
